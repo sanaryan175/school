@@ -144,7 +144,7 @@ Uses the **Haversine formula** to compute great-circle distance between two GPS 
 ## Deployment (Railway / Render / Heroku)
 
 1. Push code to GitHub.
-2. Create a new project on [Railway](https://railway.app) or [Render](https://render.com).
+2. Create a new project on Vercel and Render
 3. Add a MySQL plugin/service.
 4. Set environment variables (`DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `PORT`).
 5. Deploy — your live URL will be shown in the dashboard.
