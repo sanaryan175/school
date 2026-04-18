@@ -1,0 +1,122 @@
+{
+    "info": {
+      "name": "School Management API",
+      "description": "Node.js + Express + MySQL APIs for managing schools with proximity sorting.",
+      "_postman_id": "school-mgmt-api-v1",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      {
+        "key": "BASE_URL",
+        "value": "http://localhost:3000",
+        "type": "string",
+        "description": "Change to your deployed URL in production"
+      }
+    ],
+    "item": [
+      {
+        "name": "Health Check",
+        "request": {
+          "method": "GET",
+          "url": "{{BASE_URL}}/",
+          "description": "Check if the API server is running."
+        },
+        "response": [
+          {
+            "name": "200 OK",
+            "status": "OK",
+            "code": 200,
+            "body": "{\n  \"status\": \"ok\",\n  \"message\": \"School Management API is running\"\n}"
+          }
+        ]
+      },
+      {
+        "name": "Add School",
+        "request": {
+          "method": "POST",
+          "url": "{{BASE_URL}}/addSchool",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"DPS Pune\",\n  \"address\": \"Lohegaon, Pune, Maharashtra 411032\",\n  \"latitude\": 18.5793,\n  \"longitude\": 73.9089\n}"
+          },
+          "description": "Adds a new school to the database. All fields are required."
+        },
+        "response": [
+          {
+            "name": "201 Created",
+            "status": "Created",
+            "code": 201,
+            "body": "{\n  \"success\": true,\n  \"message\": \"School added successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"DPS Pune\",\n    \"address\": \"Lohegaon, Pune, Maharashtra 411032\",\n    \"latitude\": 18.5793,\n    \"longitude\": 73.9089\n  }\n}"
+          },
+          {
+            "name": "422 Validation Error",
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "body": "{\n  \"success\": false,\n  \"errors\": [\n    { \"field\": \"name\", \"message\": \"Name is required\" },\n    { \"field\": \"latitude\", \"message\": \"Latitude must be between -90 and 90\" }\n  ]\n}"
+          }
+        ]
+      },
+      {
+        "name": "Add School - Missing Fields (Validation Test)",
+        "request": {
+          "method": "POST",
+          "url": "{{BASE_URL}}/addSchool",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"\",\n  \"address\": \"Some Address\",\n  \"latitude\": 999,\n  \"longitude\": 73.9089\n}"
+          },
+          "description": "Tests validation — empty name and out-of-range latitude should return 422."
+        },
+        "response": []
+      },
+      {
+        "name": "List Schools by Proximity",
+        "request": {
+          "method": "GET",
+          "url": {
+            "raw": "{{BASE_URL}}/listSchools?latitude=18.5204&longitude=73.8567",
+            "host": ["{{BASE_URL}}"],
+            "path": ["listSchools"],
+            "query": [
+              { "key": "latitude",  "value": "18.5204", "description": "User's latitude (Pune city center)" },
+              { "key": "longitude", "value": "73.8567", "description": "User's longitude (Pune city center)" }
+            ]
+          },
+          "description": "Returns all schools sorted by distance (km) from the given coordinates. Uses the Haversine formula."
+        },
+        "response": [
+          {
+            "name": "200 OK",
+            "status": "OK",
+            "code": 200,
+            "body": "{\n  \"success\": true,\n  \"count\": 2,\n  \"user_location\": { \"latitude\": 18.5204, \"longitude\": 73.8567 },\n  \"data\": [\n    {\n      \"id\": 2,\n      \"name\": \"The Orchid School\",\n      \"address\": \"Baner, Pune\",\n      \"latitude\": 18.559,\n      \"longitude\": 73.7868,\n      \"created_at\": \"2025-01-01T00:00:00.000Z\",\n      \"distance_km\": 7.83\n    },\n    {\n      \"id\": 1,\n      \"name\": \"DPS Pune\",\n      \"address\": \"Lohegaon, Pune\",\n      \"latitude\": 18.5793,\n      \"longitude\": 73.9089,\n      \"created_at\": \"2025-01-01T00:00:00.000Z\",\n      \"distance_km\": 8.12\n    }\n  ]\n}"
+          },
+          {
+            "name": "422 Missing Query Params",
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "body": "{\n  \"success\": false,\n  \"errors\": [\n    { \"field\": \"latitude\", \"message\": \"Latitude query param is required\" }\n  ]\n}"
+          }
+        ]
+      },
+      {
+        "name": "List Schools - Invalid Coords (Validation Test)",
+        "request": {
+          "method": "GET",
+          "url": {
+            "raw": "{{BASE_URL}}/listSchools?latitude=abc&longitude=73.8567",
+            "host": ["{{BASE_URL}}"],
+            "path": ["listSchools"],
+            "query": [
+              { "key": "latitude",  "value": "abc" },
+              { "key": "longitude", "value": "73.8567" }
+            ]
+          },
+          "description": "Tests validation — non-numeric latitude should return 422."
+        },
+        "response": []
+      }
+    ]
+  }
